@@ -13,10 +13,6 @@
 #include "gameTools.h"
 #define NB_SUPPORT_PLAYER 5
 
-int sock;
-int csock[NB_SUPPORT_PLAYER];
-char name[NB_SUPPORT_PLAYER][SIZE_COM];
-int nb;
 int runSer();
 int openSer();
 void gameSer();

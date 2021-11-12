@@ -12,7 +12,6 @@
 #include "tools.h"
 #include "gameTools.h"
 
-int sock;
 int runCli();
 int openCli();
 void gameCli();

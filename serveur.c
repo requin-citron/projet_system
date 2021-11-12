@@ -1,5 +1,15 @@
-
 #include "serveur.h"
+//! Variable globale propre au serveur
+/*!
+
+*/
+
+
+int sock;
+int csock[NB_SUPPORT_PLAYER];
+char name[NB_SUPPORT_PLAYER][SIZE_COM];
+int nb;
+
 
 int runSer() {
     if (openSer()==EXIT_FAILURE) {
