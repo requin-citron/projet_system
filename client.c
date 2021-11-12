@@ -20,17 +20,6 @@ int runCli() {
     closeCli();
     return EXIT_SUCCESS;
 }
-void gameCli() {
-    printf(" Waiting for more players...\n");
-    char resp[SIZE_COM];
-    recv(sock,resp,SIZE_COM,0);
-    printf(resp);
-    int cards[NB_CARD];
-    recv(sock,cards,sizeof(cards),0);
-    printf(" Your cards : ");
-    printCards(cards);
-    printf("\n");
-}
 int openCli() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
@@ -49,4 +38,28 @@ int openCli() {
 }
 void closeCli() {
     close(sock);
+}
+void gameCli() {
+    printf(" Waiting for more players...\n");
+    char resp[SIZE_COM];
+    recv(sock,resp,SIZE_COM,0);
+    printf(resp);
+    int cards[NB_CARD];
+    recv(sock,cards,sizeof(cards),0);
+    printf(" Your cards : ");
+    printCards(cards);
+    printf("\n");
+    resp[0] = '\0';
+    while(strcmp(resp,"END")) {
+        recv(sock,resp,SIZE_COM,0);
+        printf(resp);
+        recv(sock,resp,SIZE_COM,0);
+        printf("--ciouf--");
+        if (strcmp(resp,"GO")) {
+            ask(" You want play ? (y or N)\n&> ",resp);
+            send(sock,resp,SIZE_COM,0);
+            recv(sock,resp,SIZE_COM,0);
+            printf(resp);
+        } else printf(resp);
+    }
 }

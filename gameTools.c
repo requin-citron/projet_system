@@ -40,3 +40,10 @@ void sort(int *cards) {
                 cards[h] = tmp;
             }
 }
+int playCard(int *cards) {
+    int pos = cardsNotEmpty(cards);
+    if (pos==-1) return -1;
+    int tmp = cards[pos];
+    cards[pos] = -1;
+    return tmp;
+}

@@ -13,5 +13,6 @@ int main(int argc, char** argv) {
     ask(" Hello, do you want to join a room or create one ? (j or C)\n&> ",resp);
     if (isWord("join",resp)) runCli();
     else runSer();
+    printf("\n");
     return EXIT_SUCCESS;
 }

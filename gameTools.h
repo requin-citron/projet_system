@@ -10,5 +10,6 @@ void pickCards(int*,int*);
 void printCards(int*);
 int cardsNotEmpty(int*);
 void sort(int*);
+int playCard(int*);
 
 #endif

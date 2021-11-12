@@ -94,14 +94,83 @@ void gameSer() {
         send(csock[t],resp,SIZE_COM,0);
     int cards[NB_CARD];
     int allCards[100];
+    int minCards[nb+1];
     initListCards(allCards);
     for (int t=0; t<nb; t++) {
         pickCards(allCards,cards);
+        minCards[t] = cards[0];
         send(csock[t],cards,sizeof(cards),0);
     }
     pickCards(allCards,cards);
+    minCards[nb] = cards[0];
     printf(" Your Cards : ");
     printCards(cards);
     printf("\n");
-
+    int idTurn = rand()%(nb+1);
+    int nbCards = NB_CARD*(nb+1);
+    int idoc = 0;
+    int lose = 0;
+    do {
+        if (idTurn<nb) { // client
+            snprintf(resp,SIZE_COM," It's %s's turn.\n",name[idTurn]);
+            for (int t=0; t<nb; t++)
+                send(csock[t],resp,SIZE_COM,0);
+            printf(resp);
+            snprintf(resp,SIZE_COM,"GO");
+            send(csock[idTurn],resp,SIZE_COM,0);
+            recv(csock[idTurn],resp,SIZE_COM,0);
+            if (isWord("yes",resp)) {
+                nbCards--;
+                allCards[idoc++] = minCards[idTurn];
+                snprintf(resp,SIZE_COM," %s wants to play %d.\n",name[idTurn],minCards[idTurn]);
+                recv(csock[idTurn],&minCards[idTurn],sizeof(&minCards[idTurn]),0);
+                for (int t=0; t<nb+1; t++)
+                    if (minCards[idTurn]>minCards[t]) {
+                        char tmp[SIZE_COM];
+                        strcpy(tmp,resp);
+                        if (t==nb)
+                            snprintf(resp,SIZE_COM,"%s But %sMaster%s had the %d.\n",tmp,GREEN,FALLBACK,minCards[t]);
+                        else
+                            snprintf(resp,SIZE_COM,"%s But %s%s%s had the %d.\n",tmp,GREEN,name[t],FALLBACK,minCards[t]);
+                        lose = 1;
+                    }
+                for (int t=0; t<nb; t++)
+                    send(csock[t],resp,SIZE_COM,0);
+                printf(resp);
+            } else {
+                idTurn++;
+            }
+        } else { // serveur
+            snprintf(resp,SIZE_COM," It's %sMaster%s's turn.\n",GREEN,FALLBACK);
+            for (int t=0; t<nb; t++)
+                send(csock[t],resp,SIZE_COM,0);
+            printf(resp);
+            ask(" You want play ? (y or N)\n&> ",resp);
+            if (isWord("yes",resp)) {
+                nbCards--;
+                allCards[idoc++] = minCards[idTurn];
+                snprintf(resp,SIZE_COM," %sMaster%s wants to play %d.\n",GREEN,FALLBACK,minCards[idTurn]);
+                minCards[idTurn] = playCard(cards);
+                for (int t=0; t<nb+1; t++)
+                    if (minCards[idTurn]>minCards[t]) {
+                        char tmp[SIZE_COM];
+                        strcpy(tmp,resp);
+                        if (t==nb)
+                            snprintf(resp,SIZE_COM,"%s But %sMaster%s had the %d.\n",tmp,GREEN,FALLBACK,minCards[t]);
+                        else
+                            snprintf(resp,SIZE_COM,"%s But %s%s%s had the %d.\n",tmp,GREEN,name[t],FALLBACK,minCards[t]);
+                        lose = 1;
+                    }
+                for (int t=0; t<nb; t++)
+                    send(csock[t],resp,SIZE_COM,0);
+                printf(resp);
+            } else {
+                idTurn++;
+            }
+        }
+        idTurn = idTurn%(nb+1);
+    } while (nbCards>0&&!lose);
+    if (lose==-1)
+        printf(" PERDU\n");
+    else printf(" GAGNER\n");
 }
