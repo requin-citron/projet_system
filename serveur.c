@@ -100,7 +100,7 @@ void gameSer() {
         send(csock[t],cards,sizeof(cards),0);
     }
     pickCards(allCards,cards);
-    printf("Your Cards : ");
+    printf(" Your Cards : ");
     printCards(cards);
     printf("\n");
 
