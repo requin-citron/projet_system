@@ -34,22 +34,22 @@ int ser_accept() {
     csock[id_csock++] = accept(sock, (struct sockaddr*)&csin, &crecsize);
     return EXIT_SUCCESS;
 }
-char* ser_recv(int id, char* msg) {
+char* ser_recv(int id, char msg[SIZE_COM]) {
     if (id>=id_csock) return NULL;
     recv(csock[id],msg,SIZE_COM,0);
     return msg;
 }
-int ser_send(int id, const char* msg) {
+int ser_send(int id, const void* msg) {
     if (id>=id_csock) return EXIT_FAILURE;
     int r = send(csock[id],msg,SIZE_COM,0);
-    //printf("%d-%d-%s",id,r,msg);
+    //printf("%d-%d-%d\n",id,r,((int*)msg)[0]);
     if (r == -1) {
         printf("ERR: transmission\n");
         return EXIT_FAILURE;
     }
     return r;
 }
-void ser_sendAll(const char* msg) {
+void ser_sendAll(const void* msg) {
     for (int t=0; t<id_csock; t++)
         ser_send(t,msg);
 }

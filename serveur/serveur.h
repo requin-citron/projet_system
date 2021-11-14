@@ -16,8 +16,8 @@
 int ser_open();
 void ser_close();
 int ser_accept();
-char* ser_recv(int,char*);
-int ser_send(int,const char*);
-void ser_sendAll(const char*);
+char* ser_recv(int,char[SIZE_COM]);
+int ser_send(int, const void*);
+void ser_sendAll(const void*);
 
 #endif

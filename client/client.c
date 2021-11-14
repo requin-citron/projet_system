@@ -20,11 +20,11 @@ int cli_open() {
     return EXIT_SUCCESS;
 }
 void cli_close() {close(sock);}
-char* cli_recv(char* msg) {
+void* cli_recv(void* msg) {
     recv(sock,msg,SIZE_COM,0);
     return msg;
 }
-int cli_send(const char *msg) {
+int cli_send(const char msg[SIZE_COM]) {
     int r = send(sock,msg,SIZE_COM,0);
     if (r == -1) {
         printf("ERR: transmission\n");

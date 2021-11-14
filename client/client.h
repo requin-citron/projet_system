@@ -15,7 +15,7 @@
 
 int cli_open();
 void cli_close();
-char* cli_recv(char*);
-int cli_send(const char*);
+void* cli_recv(void*);
+int cli_send(const char[SIZE_COM]);
 
 #endif

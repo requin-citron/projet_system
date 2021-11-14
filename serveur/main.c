@@ -4,22 +4,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "serveur.h"
 #define SIZE_IN 50
 
 #define NB_CARDS 10
 
 int part_acceptUsers(char[NB_SUPPORT_USERS][SIZE_IN]);
-void part_distribCards(int,int[NB_SUPPORT_USERS][NB_CARDS]);
-char* ask(const char*,char*);
+void part_distribCards(int,int[NB_SUPPORT_USERS]);
+char* ask(const char*,char[SIZE_IN]);
+int* pickCards(int[100],int[NB_CARDS]);
+int* sort(int[NB_CARDS]);
+void printCards(int*,int);
+int cardsNotEmpty(int*,int);
 
 int main(int argc, char** argv) {
+    srand(time(NULL));
     ser_open();
     char namePlayers[NB_SUPPORT_USERS][SIZE_IN];
     int nbPlayers = part_acceptUsers(namePlayers);
     ser_sendAll("NEXT");
-    ser_sendAll(" Welcome in the mind game !\n Your card are : ");
-    int minCardsByPlayers[nbPlayers][NB_CARDS];
+    ser_sendAll(" Welcome in the mind game !\n Your cards are : ");
+    int minCardsByPlayers[nbPlayers];
     part_distribCards(nbPlayers,minCardsByPlayers);
     ser_close();
     printf("\n");
@@ -42,19 +48,65 @@ int part_acceptUsers(char namePlayers[NB_SUPPORT_USERS][SIZE_IN]) {
         ser_recv(t,buff);
         snprintf(namePlayers[t],SIZE_IN,buff);
         namePlayers[t][strlen(namePlayers[t])-1] = '\0';
-        snprintf(buff,SIZE_COM," Player %s (%d/%d) has just entered the room\n",namePlayers[t],t+1,nbPlayers);
+        snprintf(buff,SIZE_COM," Player %s (%d/%d) has just entered the room.\n",namePlayers[t],t+1,nbPlayers);
         ser_sendAll(buff);
+        printf(buff);
     }
     return nbPlayers;
 }
-void part_distribCards(int nbPlayers, int minCardsByPlayers[NB_SUPPORT_USERS][NB_CARDS]) {
-    for (int t=0; t<nbPlayers; t++)
-        for (int h=0; h<NB_CARDS; h++)
-            minCardsByPlayers[t][h] = 0;
+void part_distribCards(int nbPlayers, int minCardsByPlayers[NB_SUPPORT_USERS]) {
+    int allCards[100];
+    for (int t=0; t<100; t++)
+        allCards[t] = t+1;
+    for (int t=0; t<nbPlayers; t++) {
+        int cards[NB_CARDS];
+        pickCards(allCards,cards);
+        minCardsByPlayers[t] = cards[0];
+        ser_send(t,cards);
+        printf(" ");
+        printCards(cards,NB_CARDS);
+        printf("\n");
+    }
 }
-char* ask(const char *intro, char *str) {
+char* ask(const char *intro, char str[SIZE_IN]) {
     printf("%s&> ",intro);
     fgets(str,SIZE_IN,stdin);
     fflush(stdin);
     return str;
+}
+int* pickCards(int allCards[100], int cards[NB_CARDS]) {
+    int nb=0;
+    while (nb<NB_CARDS) {
+        int pick = rand()%100;
+        if (allCards[pick]==-1)
+            continue;
+        cards[nb++] = allCards[pick];
+        allCards[pick] = -1;
+    }
+    return sort(cards);
+}
+int* sort(int cards[NB_CARDS]) {
+    for (int t=0; t<NB_CARDS-1; t++)
+        for (int h=t+1; h<NB_CARDS; h++)
+            if (cards[t]>cards[h]) {
+                int tmp = cards[t];
+                cards[t] = cards[h];
+                cards[h] = tmp;
+            }
+    return cards;
+}
+void printCards(int* cards, int s) {
+    int pos = cardsNotEmpty(cards,s);
+    if (pos==-1) return;
+    printf("[%d",cards[pos]);
+    while (++pos<s)
+        if (cards[pos]!=-1)
+            printf(",%d",cards[pos]);
+    printf("]");
+}
+int cardsNotEmpty(int *cards, int s) {
+    for (int t=0; t<s; t++)
+        if (cards[t]!=-1)
+            return t;
+    return -1;
 }
