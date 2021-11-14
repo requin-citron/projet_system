@@ -15,7 +15,7 @@
 
 int cli_open();
 void cli_close();
-char* cli_recv();
+char* cli_recv(char*);
 int cli_send(const char*);
 
 #endif

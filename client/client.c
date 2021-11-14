@@ -1,8 +1,7 @@
 
 #include "client.h"
 
-int sock;
-char cli_BUFF[SIZE_COM];
+static int sock;
 
 int cli_open() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -21,9 +20,9 @@ int cli_open() {
     return EXIT_SUCCESS;
 }
 void cli_close() {close(sock);}
-char* cli_recv() {
-    recv(sock,cli_BUFF,SIZE_COM,0);
-    return cli_BUFF;
+char* cli_recv(char* msg) {
+    recv(sock,msg,SIZE_COM,0);
+    return msg;
 }
 int cli_send(const char *msg) {
     int r = send(sock,msg,SIZE_COM,0);

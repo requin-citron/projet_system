@@ -17,9 +17,16 @@ char* ask(const char *intro, char *str) {
 int main(int argc, char** argv) {
     cli_open();
 
-    char buff[SIZE_IN];
-    cli_send(ask(cli_recv(),buff));
-    printf(cli_recv());
+    char buff[SIZE_COM];
+    cli_recv(buff);
+    cli_send(ask(buff,buff));
+    cli_recv(buff);
+    while(strcmp(buff,"NEXT")) {
+        printf(buff);
+        cli_recv(buff);
+    }
+    printf("%s\n",cli_recv(buff));
+
 
     cli_close();
     printf("\n");
