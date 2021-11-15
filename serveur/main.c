@@ -22,7 +22,9 @@ int cardsNotEmpty(int*,int);
 
 int main(int argc, char** argv) {
     srand(time(NULL));
-    ser_open();
+    if(ser_open() == EXIT_FAILURE){
+      return EXIT_FAILURE;
+    }
 
     int nbPlayers = part_askNbPlayers();
 
@@ -81,10 +83,10 @@ void part_distribCards(int nbPlayers, int* minCardsByPlayers) {
 }
 void part_game(int nbP, char nameP[NB_SUPPORT_USERS][SIZE_IN], int* minCars) {
     int cardTmp;
-    int idTurnP = rand()%nb;
-    do {
+    int idTurnP = rand()%nbP;
+    //do {
 
-    }
+    //}
 }
 char* ask(const char *intro, char str[SIZE_IN]) {
     printf("%s&> ",intro);
