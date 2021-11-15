@@ -1,4 +1,3 @@
-
 #include "client.h"
 
 static int sock;
@@ -6,7 +5,7 @@ static int sock;
 int cli_open() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
-        printf("ERR: socket\n");
+        fprintf(stderr, "%s\n", strerror(errno));
         return EXIT_FAILURE;
     }
     struct sockaddr_in sin;
@@ -14,7 +13,7 @@ int cli_open() {
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
     if(connect(sock, (struct sockaddr*)&sin, sizeof(sin)) == -1) {
-        printf("ERR: connect failed\n");
+        fprintf(stderr, "%s\n", strerror(errno));
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -27,7 +26,8 @@ void* cli_recv(void* msg) {
 int cli_send(const char msg[SIZE_COM]) {
     int r = send(sock,msg,SIZE_COM,0);
     if (r == -1) {
-        printf("ERR: transmission\n");
+        //printf("ERR: transmission\n");
+        fprintf(stderr, "%s\n", strerror(errno));
         return EXIT_FAILURE;
     }
     return r;

@@ -1,4 +1,3 @@
-
 #ifndef SERVEUR_H
 #define SERVEUR_H
 
@@ -9,6 +8,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 #define PORT 23
 #define SIZE_COM 500
 #define NB_SUPPORT_USERS 5

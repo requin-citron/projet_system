@@ -1,24 +1,36 @@
 CC=gcc
 CFLAG=-Wall
 RM=rm
+CLIENT_DIRECTORY=./client
+SERVER_DIRECTORY=./serveur
 
+all:client server
 
-all:main
+client: $(CLIENT_DIRECTORY)/client
 
-main: tools.o serveur.o gameTools.o client.o main.o
-		$(CC) $(CFLAG) $^ -o main
-main.o: main.c
-		$(CC) $(CFLAG) -c $<
-client.o: client.c client.h
-		$(CC) $(CFLAG) -c $<
-gameTools.o: gameTools.c gameTools.h
-		$(CC) $(CFLAG) -c $<
-serveur.o: serveur.c serveur.h
-		$(CC) $(CFLAG) -c $<
-tools.o: tools.c tools.h
-		$(CC) $(CFLAG) -c $<
+server: $(SERVER_DIRECTORY)/serveur
+
+$(CLIENT_DIRECTORY)/client:$(CLIENT_DIRECTORY)/client.o $(CLIENT_DIRECTORY)/main.o
+		$(CC) $(CFLAG) $^ -o $@
+
+$(CLIENT_DIRECTORY)/client.o: $(CLIENT_DIRECTORY)/client.c $(CLIENT_DIRECTORY)/client.h
+		$(CC) $(CFLAG) $< -c -o $@
+
+$(CLIENT_DIRECTORY)/main.o: $(CLIENT_DIRECTORY)/main.c
+		$(CC) $(CFLAG) $< -c -o $@
+
+$(SERVER_DIRECTORY)/serveur:$(SERVER_DIRECTORY)/serveur.o $(SERVER_DIRECTORY)/main.o
+		$(CC) $(CFLAG) $^ -o $@
+
+$(SERVER_DIRECTORY)/serveur.o: $(SERVER_DIRECTORY)/serveur.c $(SERVER_DIRECTORY)/serveur.h
+		$(CC) $(CFLAG) $< -c -o $@
+
+$(SERVER_DIRECTORY)/main.o: $(SERVER_DIRECTORY)/main.c
+		$(CC) $(CFLAG) $< -c -o $@
+
 clean:
-		$(RM) *.o
+		$(RM) ./client/*.o
+		$(RM) ./serveur/*.o
 doc:
 		doxygen
 doc_clean:

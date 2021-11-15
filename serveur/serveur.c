@@ -8,7 +8,7 @@ static int id_csock = 0;
 int ser_open() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
-        printf("ERR: socket\n");
+        fprintf(stderr,"%s\n", strerror(errno));
         return EXIT_FAILURE;
     }
     struct sockaddr_in sin;
@@ -17,11 +17,11 @@ int ser_open() {
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
     if (bind(sock, (struct sockaddr*)&sin, recsize) == -1) {
-        printf("ERR: bind\n");
+        fprintf(stderr,"%s\n", strerror(errno));
         return EXIT_FAILURE;
     }
     if (listen(sock, NB_SUPPORT_USERS) == -1) {
-        printf("ERR: listen\n");
+        fprintf(stderr,"%s\n", strerror(errno));
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -44,7 +44,8 @@ int ser_send(int id, const void* msg) {
     int r = send(csock[id],msg,SIZE_COM,0);
     //printf("%d-%d-%d\n",id,r,((int*)msg)[0]);
     if (r == -1) {
-        printf("ERR: transmission\n");
+        fprintf(stderr,"%s\n", strerror(errno));
+        //printf("ERR: transmission\n");
         return EXIT_FAILURE;
     }
     return r;
