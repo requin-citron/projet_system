@@ -21,10 +21,13 @@ void printCards(int*,int);
 int cardsNotEmpty(int*,int);
 
 int main(int argc, char** argv) {
-    srand(time(NULL));
-    if(ser_open() == EXIT_FAILURE){
-      return EXIT_FAILURE;
+    while(ser_open() == EXIT_FAILURE) {
+      printf("Retry... ");
+      getchar();
     }
+    fflush(stdin);
+
+    srand(time(NULL));
 
     int nbPlayers = part_askNbPlayers();
 
@@ -40,7 +43,6 @@ int main(int argc, char** argv) {
     printf("\n");
     return EXIT_SUCCESS;
 }
-
 int part_askNbPlayers() {
     int nbPlayers = -1;
     do {
@@ -50,6 +52,7 @@ int part_askNbPlayers() {
         char buff[SIZE_IN];
         nbPlayers=atoi(ask("",buff));
     } while (nbPlayers==0||nbPlayers>NB_SUPPORT_USERS);
+    return nbPlayers;
 }
 int part_acceptUsers(int nbPlayers, char namePlayers[NB_SUPPORT_USERS][SIZE_IN]) {
     for (int t=0; t<nbPlayers; t++) {
@@ -82,10 +85,10 @@ void part_distribCards(int nbPlayers, int* minCardsByPlayers) {
     }
 }
 void part_game(int nbP, char nameP[NB_SUPPORT_USERS][SIZE_IN], int* minCars) {
-    int cardTmp;
-    int idTurnP = rand()%nbP;
+    //int cardTmp;
+    //int idTurnP = rand()%nbP;
     //do {
-
+;
     //}
 }
 char* ask(const char *intro, char str[SIZE_IN]) {

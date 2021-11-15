@@ -14,9 +14,11 @@ void printCards(int*,int);
 int cardsNotEmpty(int*,int);
 
 int main(int argc, char** argv) {
-    if(cli_open() == EXIT_FAILURE){
-      return EXIT_FAILURE;
+    while(cli_open() == EXIT_FAILURE) {
+      printf("Retry... ");
+      getchar();
     }
+    fflush(stdin);
     char buff[SIZE_COM];
     cli_recv(buff); // hello
     cli_send(ask(buff,buff)); // send name
