@@ -20,7 +20,9 @@ int cardsNotEmpty(int*,int);
 
 int main(int argc, char** argv) {
     srand(time(NULL));
-    ser_open();
+    if(ser_open() == EXIT_FAILURE){
+      return EXIT_FAILURE;
+    }
     char namePlayers[NB_SUPPORT_USERS][SIZE_IN];
     int nbPlayers = part_acceptUsers(namePlayers);
     ser_sendAll("NEXT");

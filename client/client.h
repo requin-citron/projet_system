@@ -9,6 +9,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
+
 #define ADDR "127.0.0.1"
 #define PORT 23
 #define SIZE_COM 500
