@@ -10,8 +10,10 @@
 
 #define NB_CARDS 10
 
-int part_acceptUsers(char[NB_SUPPORT_USERS][SIZE_IN]);
-void part_distribCards(int,int[NB_SUPPORT_USERS]);
+int part_askNbPlayers();
+int part_acceptUsers(int,char[NB_SUPPORT_USERS][SIZE_IN]);
+void part_distribCards(int,int*);
+void part_game(int,char[NB_SUPPORT_USERS][SIZE_IN],int*);
 char* ask(const char*,char[SIZE_IN]);
 int* pickCards(int[100],int[NB_CARDS]);
 int* sort(int[NB_CARDS]);
@@ -21,18 +23,23 @@ int cardsNotEmpty(int*,int);
 int main(int argc, char** argv) {
     srand(time(NULL));
     ser_open();
-    char namePlayers[NB_SUPPORT_USERS][SIZE_IN];
-    int nbPlayers = part_acceptUsers(namePlayers);
-    ser_sendAll("NEXT");
-    ser_sendAll(" Welcome in the mind game !\n Your cards are : ");
+
+    int nbPlayers = part_askNbPlayers();
+
+    char namePlayers[nbPlayers][SIZE_IN];
+    part_acceptUsers(nbPlayers,namePlayers);
+
     int minCardsByPlayers[nbPlayers];
     part_distribCards(nbPlayers,minCardsByPlayers);
+
+    part_game(nbPlayers,namePlayers,minCardsByPlayers);
+
     ser_close();
     printf("\n");
     return EXIT_SUCCESS;
 }
 
-int part_acceptUsers(char namePlayers[NB_SUPPORT_USERS][SIZE_IN]) {
+int part_askNbPlayers() {
     int nbPlayers = -1;
     do {
         if (nbPlayers==0)
@@ -41,6 +48,8 @@ int part_acceptUsers(char namePlayers[NB_SUPPORT_USERS][SIZE_IN]) {
         char buff[SIZE_IN];
         nbPlayers=atoi(ask("",buff));
     } while (nbPlayers==0||nbPlayers>NB_SUPPORT_USERS);
+}
+int part_acceptUsers(int nbPlayers, char namePlayers[NB_SUPPORT_USERS][SIZE_IN]) {
     for (int t=0; t<nbPlayers; t++) {
         ser_accept();
         ser_send(t," Hello, what's your name ?\n");
@@ -54,7 +63,9 @@ int part_acceptUsers(char namePlayers[NB_SUPPORT_USERS][SIZE_IN]) {
     }
     return nbPlayers;
 }
-void part_distribCards(int nbPlayers, int minCardsByPlayers[NB_SUPPORT_USERS]) {
+void part_distribCards(int nbPlayers, int* minCardsByPlayers) {
+    ser_sendAll("NEXT");
+    ser_sendAll(" Welcome in the mind game !\n Your cards are : ");
     int allCards[100];
     for (int t=0; t<100; t++)
         allCards[t] = t+1;
@@ -66,6 +77,13 @@ void part_distribCards(int nbPlayers, int minCardsByPlayers[NB_SUPPORT_USERS]) {
         printf(" ");
         printCards(cards,NB_CARDS);
         printf("\n");
+    }
+}
+void part_game(int nbP, char nameP[NB_SUPPORT_USERS][SIZE_IN], int* minCars) {
+    int cardTmp;
+    int idTurnP = rand()%nb;
+    do {
+        
     }
 }
 char* ask(const char *intro, char str[SIZE_IN]) {
