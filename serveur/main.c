@@ -85,17 +85,17 @@ void part_distribCards(int nbPlayers, int* minCardsByPlayers) {
     }
 }
 void part_game(int nbP, char nameP[NB_SUPPORT_USERS][SIZE_IN], int* minCars) {
-    int cardTmp;
+    /*int cardTmp;
     int idTurnP = rand()%nbP;
     do {
         ser_send(idTurnP,"PLAY");
         char buff[SIZE_COM];
         ser_recv(idTurnP,buff);
         if(!strcmp(buff,"P")) {
-        
+
             cli_recv(buff);
         }
-    } while();
+    } while();*/
 }
 char* ask(const char *intro, char str[SIZE_IN]) {
     printf("%s&> ",intro);
