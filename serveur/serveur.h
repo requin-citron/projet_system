@@ -10,13 +10,23 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#define PORT 23
+#define PORT 8080
 #define SIZE_COM 500
 #define NB_SUPPORT_USERS 5
 
+
+typedef struct{
+  FILE **lst;
+  size_t end;
+  size_t size;
+} clientArray;
+
+
+clientArray* createClientArray(size_t);
+void freeClientArray(clientArray *);
 int ser_open();
 void ser_close();
-int ser_accept();
+int ser_accept(clientArray *);
 char* ser_recv(int,char[SIZE_COM]);
 int ser_send(int, const void*);
 void ser_sendAll(const void*);

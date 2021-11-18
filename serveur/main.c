@@ -11,7 +11,7 @@
 #define NB_CARDS 10
 
 int part_askNbPlayers();
-int part_acceptUsers(int,char[NB_SUPPORT_USERS][SIZE_IN]);
+int part_acceptUsers(int,char[NB_SUPPORT_USERS][SIZE_IN], clientArray*);
 void part_distribCards(int,int*);
 void part_game(int,char[NB_SUPPORT_USERS][SIZE_IN],int*);
 char* ask(const char*,char[SIZE_IN]);
@@ -25,14 +25,13 @@ int main(int argc, char** argv) {
       printf("Retry... ");
       getchar();
     }
+
     fflush(stdin);
-
     srand(time(NULL));
-
     int nbPlayers = part_askNbPlayers();
-
+    clientArray *clients = createClientArray((size_t)nbPlayers);
     char namePlayers[nbPlayers][SIZE_IN];
-    part_acceptUsers(nbPlayers,namePlayers);
+    part_acceptUsers(nbPlayers,namePlayers, clients);
 
     int minCardsByPlayers[nbPlayers];
     part_distribCards(nbPlayers,minCardsByPlayers);
@@ -41,6 +40,8 @@ int main(int argc, char** argv) {
 
     ser_close();
     printf("\n");
+    //free
+    freeClientArray(clients);
     return EXIT_SUCCESS;
 }
 int part_askNbPlayers() {
@@ -54,15 +55,22 @@ int part_askNbPlayers() {
     } while (nbPlayers==0||nbPlayers>NB_SUPPORT_USERS);
     return nbPlayers;
 }
-int part_acceptUsers(int nbPlayers, char namePlayers[NB_SUPPORT_USERS][SIZE_IN]) {
+int part_acceptUsers(int nbPlayers, char namePlayers[NB_SUPPORT_USERS][SIZE_IN], clientArray *clients) {
+    FILE *currentClient=NULL;
     for (int t=0; t<nbPlayers; t++) {
-        ser_accept();
-        ser_send(t," Hello, what's your name ?\n");
+        ser_accept(clients);
+        currentClient = clients->lst[clients->end-1];
+        //ser_send(t," Hello, what's your name ?\n");
+        fprintf(currentClient, "Hello, what's your name ?\n");
         char buff[SIZE_COM];
-        ser_recv(t,buff);
-        snprintf(namePlayers[t],SIZE_IN,buff);
+        //ser_recv(t,buff);
+        fgets(buff,SIZE_COM, currentClient);
+        printf("Resp: %s magie\n", buff);
+        //snprintf(namePlayers[t],SIZE_IN,buff);
+        strncpy(namePlayers[t],buff,SIZE_IN);
         namePlayers[t][strlen(namePlayers[t])-1] = '\0';
-        snprintf(buff,SIZE_COM," Player %s (%d/%d) has just entered the room.\n",namePlayers[t],t+1,nbPlayers);
+        //snprintf(buff,SIZE_COM," Player %s (%d/%d) has just entered the room.\n",namePlayers[t],t+1,nbPlayers);
+        fprintf(currentClient, "Player %s (%d/%d) has just entered the room.\n", namePlayers[t],t+1,nbPlayers);
         ser_sendAll(buff);
         printf(buff);
     }

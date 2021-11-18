@@ -1,10 +1,25 @@
 
 #include "serveur.h"
 
+
 static int sock;
 static int csock[NB_SUPPORT_USERS];
 static int id_csock = 0;
 
+clientArray* createClientArray(size_t max_client){
+  clientArray* ret = malloc(sizeof(clientArray));
+  if(ret==NULL){fprintf(stderr,"%s\n", strerror(errno));exit(errno);}
+  ret->lst = malloc(sizeof(FILE *)*max_client);
+  if(ret->lst == NULL){fprintf(stderr,"%s\n", strerror(errno));exit(errno);}
+  ret->size = max_client;
+  ret->end = 0;
+  return ret;
+}
+void freeClientArray(clientArray *in){
+  free(in->lst);
+  free(in);
+  return;
+}
 int ser_open() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
@@ -27,11 +42,19 @@ int ser_open() {
     return EXIT_SUCCESS;
 }
 void ser_close() {close(sock);}
-int ser_accept() {
+int ser_accept(clientArray *clients) {
     if (id_csock==NB_SUPPORT_USERS) return EXIT_FAILURE;
     struct sockaddr_in csin;
     socklen_t crecsize = sizeof(csin);
-    csock[id_csock++] = accept(sock, (struct sockaddr*)&csin, &crecsize);
+    int tmp = accept(sock, (struct sockaddr*)&csin, &crecsize);
+    csock[id_csock++] = tmp;
+    clients->lst[clients->end] = fdopen(tmp,"a+");
+    if(clients->lst[clients->end] == NULL){
+      fprintf(stderr,"%s\n", strerror(errno));
+      return EXIT_FAILURE;
+    }
+    setvbuf(clients->lst[clients->end], NULL, _IONBF, 0);
+    clients->end++;
     return EXIT_SUCCESS;
 }
 char* ser_recv(int id, char msg[SIZE_COM]) {
