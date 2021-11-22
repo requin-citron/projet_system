@@ -42,6 +42,7 @@ int ser_open() {
     return EXIT_SUCCESS;
 }
 void ser_close() {close(sock);}
+
 int ser_accept(clientArray *clients) {
     if (id_csock==NB_SUPPORT_USERS) return EXIT_FAILURE;
     struct sockaddr_in csin;

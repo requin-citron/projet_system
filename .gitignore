@@ -4,3 +4,6 @@ a.out
 /html
 /client/*.o
 /serveur/*.o
+/serveur/serveur
+/serveur_kleman/*.o
+/serveur_kleman/serveur_kleman
