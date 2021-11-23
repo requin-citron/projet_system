@@ -11,8 +11,9 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
+#include <stdbool.h>
 
-#define PORT 8081
+#define PORT 8080
 #define SIZE_NAME 50
 
 typedef struct{
@@ -34,4 +35,6 @@ clientArray* createClientArray(size_t);
 void freeClientArray(clientArray *);
 void acceptClient(int,clientArray *, size_t);
 void *pthreadInitClient(void *);
+void *pthreadAskClient(void *);
+bool checkNewGame(clientArray *);
 #endif

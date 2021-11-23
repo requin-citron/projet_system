@@ -1,5 +1,5 @@
 CC=gcc
-CFLAG=-Wall -Wextra
+CFLAG=-g3 -ggdb -Wall -Wextra
 LIBS=-lpthread
 RM=rm
 CLIENT_DIRECTORY=./client

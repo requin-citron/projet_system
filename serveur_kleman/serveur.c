@@ -35,7 +35,27 @@ void *pthreadInitClient(void *ptrClient){
   cli->name[strlen(cli->name)-1] = '\0';
   cli->size=0;
   cli->cartes=NULL;
-  return NULL;
+  pthread_exit (ptrClient);
+}
+
+
+//! thread demande valeur y ou n aux client
+/*!
+  \param ptrClient pointeur sur la strucutre client
+  \return return pointeur sur le char
+*/
+void *pthreadAskClient(void *ptrClient){
+  char *reponse = malloc(sizeof(char)*3);
+  client *cli=(client *)ptrClient;
+  if(reponse==NULL){
+    fprintf(stderr, "%s\n", strerror(errno));
+    exit(errno);
+  }
+  do {
+    fprintf(cli->file_ptr,"Voulez vous rejouer une partie ?(y/n): ");
+    fgets(reponse,3,cli->file_ptr);
+  } while(reponse[0]!='y' && reponse[0]!='n');
+  pthread_exit((void *)reponse);
 }
 
 //! Accept connexion
@@ -119,4 +139,32 @@ void freeClientArray(clientArray *in){
   free(in->lst);
   free(in);
   return;
+}
+
+//! Demande aux joeurs pour une potentiel nouvelle partie
+bool checkNewGame(clientArray *in){
+    pthread_t *lst = malloc(sizeof(pthread_t)*in->size);
+    int check;
+    if(lst==NULL){
+      fprintf(stderr, "%s\n", strerror(errno));
+      exit(errno);
+    }
+    for(size_t i=0;i<in->size;i++){
+      check=pthread_create(lst+i,NULL, pthreadAskClient, (void *)(in->lst+i));
+
+      if(check!=0){
+        fprintf(stderr,"%s\n", strerror(errno));
+        exit(errno);
+      }
+    }
+    char *ret;
+    char bool_ret='y';
+    for(size_t i=0; i<in->size;i++){
+      pthread_join(lst[i], (void *)&ret);
+      bool_ret = bool_ret & (*ret);
+      free(ret);
+    }
+    free(lst);
+    if(bool_ret=='y') return true;
+    return false;
 }
