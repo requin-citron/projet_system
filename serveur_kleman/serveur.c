@@ -52,7 +52,7 @@ void *pthreadAskClient(void *ptrClient){
     exit(errno);
   }
   do {
-    fprintf(cli->file_ptr,"Voulez vous rejouer une partie ?(y/n): ");
+    fprintf(cli->file_ptr,"\e[1;1H\e[2JVoulez vous rejouer une partie ?(y/n): ");
     fgets(reponse,3,cli->file_ptr);
   } while(reponse[0]!='y' && reponse[0]!='n');
   pthread_exit((void *)reponse);
@@ -126,6 +126,8 @@ clientArray* createClientArray(size_t max_client){
   }
   for(size_t i=0; i < max_client; i++){
     ret->lst[i].file_ptr=NULL;
+    ret->lst[i].cartes = NULL;
+    ret->lst[i].available=true;
   }
   ret->size = max_client;
   return ret;
@@ -135,6 +137,9 @@ clientArray* createClientArray(size_t max_client){
 void freeClientArray(clientArray *in){
   for(size_t i=0; i<in->size ; i++){
     fclose(in->lst[i].file_ptr);
+    if(in->lst[i].cartes!=NULL){
+      free(in->lst[i].cartes);
+    }
   }
   free(in->lst);
   free(in);

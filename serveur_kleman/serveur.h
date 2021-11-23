@@ -12,21 +12,10 @@
 #include <errno.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include "client.h"
 
 #define PORT 8080
-#define SIZE_NAME 50
 
-typedef struct{
-  char name[SIZE_NAME];
-  size_t *cartes;
-  FILE *file_ptr;
-  size_t size;
-} client;
-
-typedef struct{
-  client *lst;
-  size_t size;
-} clientArray;
 
 
 

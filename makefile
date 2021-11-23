@@ -32,7 +32,7 @@ $(SERVER_DIRECTORY)/serveur.o: $(SERVER_DIRECTORY)/serveur.c $(SERVER_DIRECTORY)
 $(SERVER_DIRECTORY)/main.o: $(SERVER_DIRECTORY)/main.c
 		$(CC) $(CFLAG) $< -c -o $@
 
-$(SERVER_KLEMOU_DIRECTORY)/serveur_kleman: $(SERVER_KLEMOU_DIRECTORY)/main.o $(SERVER_KLEMOU_DIRECTORY)/serveur.o
+$(SERVER_KLEMOU_DIRECTORY)/serveur_kleman: $(SERVER_KLEMOU_DIRECTORY)/client.o $(SERVER_KLEMOU_DIRECTORY)/main.o $(SERVER_KLEMOU_DIRECTORY)/serveur.o
 		$(CC) $(CFLAG) $(LIBS) $^ -o $@
 
 $(SERVER_KLEMOU_DIRECTORY)/main.o: $(SERVER_KLEMOU_DIRECTORY)/main.c
@@ -41,6 +41,8 @@ $(SERVER_KLEMOU_DIRECTORY)/main.o: $(SERVER_KLEMOU_DIRECTORY)/main.c
 $(SERVER_KLEMOU_DIRECTORY)/serveur.o: $(SERVER_KLEMOU_DIRECTORY)/serveur.c $(SERVER_KLEMOU_DIRECTORY)/serveur.h
 		$(CC) $(CFLAG) $(LIBS) $< -c -o $@
 
+$(SERVER_KLEMOU_DIRECTORY)/client.o: $(SERVER_KLEMOU_DIRECTORY)/client.c $(SERVER_KLEMOU_DIRECTORY)/client.h
+		$(CC) $(CFLAG) $(LIBS) $< -c -o $@
 
 clean:
 		$(RM) ./client/*.o
