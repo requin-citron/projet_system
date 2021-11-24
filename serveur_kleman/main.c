@@ -20,6 +20,8 @@ int main(int argc, char const *argv[]) {
   clientArray *lstClient = NULL;
   char *packet = createPacket(SIZE_PACKET,1000);
   size_t curr_manche=1;
+  char prev_card = 0;
+  bool manche_state = true;
   //client input
   char client_input[SIZE_INPUT_USER];
   char *ret_fgets;
@@ -39,11 +41,17 @@ int main(int argc, char const *argv[]) {
   }
   //game loop
   do {
+    changeAllClientIONonBlock(lstClient);
+    if(nb_manche < curr_manche) curr_manche=1;
     packetFlush(packet, SIZE_PACKET, 1000);
+
+    for (size_t i = 0; i < lstClient->size; i++) {
+      fprintf(lstClient->lst[i].file_ptr, "\e[1;1H\e[2JVous etes manche %lu\n",curr_manche);
+    }
+
     sendCards(lstClient,curr_manche, packet);
 
-    changeAllClientIONonBlock(lstClient);
-    while(checkAllClientEmpty(lstClient)){
+    while(checkAllClientEmpty(lstClient) && manche_state){
       //for each clients
       for (size_t i = 0; i < lstClient->size; i++) {
         ret_fgets= fgets(client_input, SIZE_INPUT_USER,lstClient->lst[i].file_ptr);
@@ -59,19 +67,34 @@ int main(int argc, char const *argv[]) {
               for(size_t d=0;d<lstClient->size;d++){
                 fprintf(lstClient->lst[d].file_ptr, "Joueur [%s] a jouer la carte %d\n", lstClient->lst[i].name, lstClient->lst[i].cartes[index_card]);
               }
+              if((prev_card != 0) && (prev_card > lstClient->lst[i].cartes[index_card])) manche_state = false;
+              prev_card = lstClient->lst[i].cartes[index_card];
               clientDelCard(lstClient->lst + i, index_card);
               clientPrint(lstClient->lst+i, lstClient->lst[i].file_ptr);
-            }
 
+            }
           }
         }
       }
       //anti saturation du cpu
       usleep(5000);
     }
+    if(manche_state){
+      for (size_t i = 0; i < lstClient->size; i++) {
+        fprintf(lstClient->lst[i].file_ptr, "Vous avez gagné la manche\n");
+      }
+      curr_manche++;
+    }else{
+      for (size_t i = 0; i < lstClient->size; i++) {
+        fprintf(lstClient->lst[i].file_ptr, "Vous avez perdu retour manche 1\n");
+      }
+      curr_manche=1;
+    }
+    manche_state = true;
+    prev_card = 0;
     changeAllClientIOBlock(lstClient);
-
-  } while(checkNewGame(lstClient)==true); //check for a new game
+    sleep(3);
+  } while((curr_manche <= nb_manche) || (checkNewGame(lstClient)==true)); //check for a new game
   //end game loop
   //clean
   free(packet);

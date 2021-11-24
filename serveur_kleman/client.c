@@ -21,7 +21,7 @@ void packetPrint(char *in, size_t len){
 void clientPrint(client *cli, FILE *out){
   fprintf(out,"Joueur %s :",cli->name);
   for(size_t i=0;i<cli->size;i++){
-    fprintf(out,"%d,",cli->cartes[i]);
+    fprintf(out,"%d(%lu),",cli->cartes[i],i);
   }
   fprintf(out, "\n");
 }
@@ -72,14 +72,12 @@ void clientGetCards(client *cli, char *packet, size_t len){
   if(cli->cartes!=NULL) free(cli->cartes);
   cli->cartes = malloc(sizeof(char)*len);
   if(cli->cartes == NULL)FATAL();
-  fprintf(cli->file_ptr,"\e[1;1H\e[2JVos cartes: ");
   for (size_t i = 0; i < len; i++) {
     cli->cartes[i] = packet[i];
-    //envois parte aux client
-    fprintf(cli->file_ptr, "%d(%lu),",cli->cartes[i],i);
   }
-  fprintf(cli->file_ptr, "\nEntrez l'index de la carte que vous voulez jouer\n");
   cli->size = len;
+  fprintf(cli->file_ptr, "\nEntrez l'index de la carte que vous voulez jouer\n");
+  clientPrint(cli, cli->file_ptr);
   return;
 }
 
@@ -95,10 +93,8 @@ void clientDelCard(client *in, size_t index){
   char *new = malloc(sizeof(char)*(in->size-1));
   if(new==NULL) FATAL();
   while (i<(in->size-1)) {
-    if(i!=index){
-      i1++;
-    }
-    new[i]=in->cartes[i1];
+    if(i1==index) i1++;
+    new[i] = in->cartes[i1];
     i++;
     i1++;
   }

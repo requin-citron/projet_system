@@ -46,6 +46,7 @@ void *pthreadInitClient(void *ptrClient){
 */
 void *pthreadAskClient(void *ptrClient){
   char *reponse = malloc(sizeof(char)*3);
+  memset(reponse,0,3);
   client *cli=(client *)ptrClient;
   if(reponse==NULL) FATAL();
   do {

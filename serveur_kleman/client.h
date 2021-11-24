@@ -11,6 +11,8 @@
 #define FATAL(){fprintf(stderr,"%s\n",strerror(errno));exit(errno);}
 
 #define SIZE_NAME 50
+// attention il faut prendre en compte le faite qu'on utilise des char pour stocker
+// les carte il faut passer sur du unsigned ou des int pour des plus gros packet
 #define SIZE_PACKET 100
 
 typedef struct{
