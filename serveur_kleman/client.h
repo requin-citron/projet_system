@@ -6,6 +6,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <fcntl.h>
 
 #define FATAL(){fprintf(stderr,"%s\n",strerror(errno));exit(errno);}
 
@@ -30,6 +31,10 @@ char *createPacket(size_t, size_t);
 void packetFlush(char *, size_t, size_t);
 void clientGetCards(client *, char *, size_t);
 void sendCards(clientArray *,size_t, char *);
-void clientPrint(client *);
+void clientPrint(client *, FILE *);
+bool checkAllClientEmpty(clientArray *);
+void clientDelCard(client *, size_t);
+void changeAllClientIONonBlock(clientArray *);
+void changeAllClientIOBlock(clientArray *);
 
 #endif

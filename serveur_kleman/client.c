@@ -13,16 +13,17 @@ void packetPrint(char *in, size_t len){
   return;
 }
 
-//! fonction de debug
+//! fonction d'affichage de la main d'un client
 /*!
   \param[in] cli pointeur sur client
+  \param[in] pointeur sur la sortie utilisé
 */
-void clientPrint(client *cli){
-  printf("Joueur %s :",cli->name);
+void clientPrint(client *cli, FILE *out){
+  fprintf(out,"Joueur %s :",cli->name);
   for(size_t i=0;i<cli->size;i++){
-    printf("%d,",cli->cartes[i]);
+    fprintf(out,"%d,",cli->cartes[i]);
   }
-  puts("");
+  fprintf(out, "\n");
 }
 
 //! melange le packet
@@ -75,9 +76,35 @@ void clientGetCards(client *cli, char *packet, size_t len){
   for (size_t i = 0; i < len; i++) {
     cli->cartes[i] = packet[i];
     //envois parte aux client
-    fprintf(cli->file_ptr, "%d,",cli->cartes[i]);
+    fprintf(cli->file_ptr, "%d(%lu),",cli->cartes[i],i);
   }
+  fprintf(cli->file_ptr, "\nEntrez l'index de la carte que vous voulez jouer\n");
   cli->size = len;
+  return;
+}
+
+//! supprime une carte d'un client
+/*!
+  \param[out] in pointeur sur le client
+  \param[in] index de la carte a supprimer
+*/
+void clientDelCard(client *in, size_t index){
+  if(in->size==0) return;
+  size_t i=0;
+  size_t i1=0;
+  char *new = malloc(sizeof(char)*(in->size-1));
+  if(new==NULL) FATAL();
+  while (i<(in->size-1)) {
+    if(i!=index){
+      i1++;
+    }
+    new[i]=in->cartes[i1];
+    i++;
+    i1++;
+  }
+  free(in->cartes);
+  in->cartes = new;
+  in->size--;
   return;
 }
 
@@ -92,4 +119,55 @@ void sendCards(clientArray *in,size_t nb_by_client, char *packet){
     clientGetCards(&in->lst[i], packet +(i*nb_by_client), nb_by_client);
   }
   return;
+}
+
+//! renvois true si tout les joueurs on défaussé toute leurs cartes
+/*!
+  \param[in] in pointeur sur le la list de client
+  \return false si tout les client on 0 cartes
+*/
+bool checkAllClientEmpty(clientArray *in){
+  for (size_t i = 0; i < in->size; i++) {
+    if(in->lst[i].size != 0) return true;
+  }
+  return false;
+}
+//! change le mode d'input en non bloquand pour tout les joueurs
+/*!
+  \param[in] in pointeur sur clientArray
+*/
+void changeAllClientIOBlock(clientArray *in){
+  int status;
+  int fd;
+  for(size_t i=0;i<in->size;i++){
+    fd = fileno(in->lst[i].file_ptr);
+    status = fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & (~O_NONBLOCK));
+    if(status==-1) FATAL();
+  }
+}
+
+//A DEBATRE
+//!envois a tout les clients une chaine
+/*!
+  \param[in] in pointeur sur la list de client
+  \param[in] str pointeur sur une chaine de char
+*/
+// void sendAllClient(clientArray *in, char *str){
+//   for(size_t i=0;i<in->size;i++){
+//     fprintf(stderr, "%s", str);
+//   }
+// }
+
+//! change le mode d'input en bloquand pour tout les joueurs
+/*!
+  \param[in] in pointeur sur clientArray
+*/
+void changeAllClientIONonBlock(clientArray *in){
+  int status;
+  int fd;
+  for(size_t i=0;i<in->size;i++){
+    fd = fileno(in->lst[i].file_ptr);
+    status = fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+    if(status==-1) FATAL();
+  }
 }
