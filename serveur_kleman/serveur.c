@@ -127,7 +127,6 @@ clientArray* createClientArray(size_t max_client){
   for(size_t i=0; i < max_client; i++){
     ret->lst[i].file_ptr=NULL;
     ret->lst[i].cartes = NULL;
-    ret->lst[i].available=true;
   }
   ret->size = max_client;
   return ret;

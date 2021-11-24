@@ -16,7 +16,6 @@ typedef struct{
   char *cartes;
   FILE *file_ptr;
   size_t size;
-  bool available;
 } client;
 
 typedef struct{
