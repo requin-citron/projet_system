@@ -36,7 +36,7 @@ int main(int argc, char const *argv[]) {
   do {
     packetFlush(packet, SIZE_PACKET, 1000);
     sendCards(lstClient,curr_manche, packet);
-    
+
   } while(checkNewGame(lstClient)==true); //check for a new game
   //end game loop
   //clean

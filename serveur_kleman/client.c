@@ -52,10 +52,7 @@ void packetFlush(char *in, size_t nbCards, size_t nbRandom){
 */
 char *createPacket(size_t nbCards, size_t nbRandom){
   char *ret = malloc(sizeof(char)*nbCards);
-  if(ret == NULL){
-    fprintf(stderr,"%s\n",strerror(errno));
-    exit(errno);
-  }
+  if(ret == NULL)FATAL();
   for(size_t i=0; i<nbCards;i++){
     ret[i]=i+1;
   }
@@ -73,10 +70,7 @@ char *createPacket(size_t nbCards, size_t nbRandom){
 void clientGetCards(client *cli, char *packet, size_t len){
   if(cli->cartes!=NULL) free(cli->cartes);
   cli->cartes = malloc(sizeof(char)*len);
-  if(cli->cartes == NULL){
-    fprintf(stderr,"%s\n",strerror(errno));
-    exit(errno);
-  }
+  if(cli->cartes == NULL)FATAL();
   fprintf(cli->file_ptr,"\e[1;1H\e[2JVos cartes: ");
   for (size_t i = 0; i < len; i++) {
     cli->cartes[i] = packet[i];

@@ -5,6 +5,7 @@ a.out
 /client/*.o
 /serveur/*.o
 /serveur/serveur
+/client/client
 /serveur_kleman/*.o
 /serveur_kleman/serveur_kleman
 /vgcore*

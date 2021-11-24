@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <stdbool.h>
 
+#define FATAL(){fprintf(stderr,"%s\n",strerror(errno));exit(errno);}
 
 #define SIZE_NAME 50
 #define SIZE_PACKET 100

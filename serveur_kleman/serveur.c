@@ -47,10 +47,7 @@ void *pthreadInitClient(void *ptrClient){
 void *pthreadAskClient(void *ptrClient){
   char *reponse = malloc(sizeof(char)*3);
   client *cli=(client *)ptrClient;
-  if(reponse==NULL){
-    fprintf(stderr, "%s\n", strerror(errno));
-    exit(errno);
-  }
+  if(reponse==NULL) FATAL();
   do {
     fprintf(cli->file_ptr,"\e[1;1H\e[2JVoulez vous rejouer une partie ?(y/n): ");
     fgets(reponse,3,cli->file_ptr);
@@ -71,38 +68,23 @@ void acceptClient(int serverSock,clientArray *clientArr, size_t nb){
   int retpthread;
   char *ip;
   pthread_t *pthread_t_lst = malloc(sizeof(pthread_t)*nb);
-  if(pthread_t_lst == NULL){
-    fprintf(stderr,"%s\n", strerror(errno));
-    exit(errno);
-  }
+  if(pthread_t_lst == NULL)FATAL();
   for(size_t i=0; i<nb;i++){
     tmp = accept(serverSock, (struct sockaddr *)&sin, &csize);
-    if(tmp==-1){
-      fprintf(stderr, "%s\n", strerror(errno));
-      exit(errno);
-    }
+    if(tmp==-1)FATAL();
     ip = inet_ntoa(sin.sin_addr);
     printf("Incoming connection [%s]\n",ip);
     clientArr->lst[i].file_ptr = fdopen(tmp,"a+");
-    if(clientArr->lst[i].file_ptr == NULL){
-      fprintf(stderr, "%s\n", strerror(errno));
-      exit(errno);
-    }
+    if(clientArr->lst[i].file_ptr == NULL)FATAL();
 
     setvbuf(clientArr->lst[i].file_ptr,NULL, _IONBF, 0);
     retpthread = pthread_create(pthread_t_lst +i, NULL, pthreadInitClient, (void *)(clientArr->lst + i));
-    if(retpthread!=0){
-      fprintf(stderr, "%s\n", strerror(errno));
-      exit(errno);
-    }
+    if(retpthread!=0)FATAL();
   }
   //wait all thread
   for(size_t i=0; i < nb; i++){
     retpthread = pthread_join(pthread_t_lst[i],NULL);
-    if(retpthread!=0){
-      fprintf(stderr, "%s\n", strerror(errno));
-      exit(errno);
-    }
+    if(retpthread!=0)FATAL();
   }
   free(pthread_t_lst);
   return;
@@ -115,15 +97,9 @@ void acceptClient(int serverSock,clientArray *clientArr, size_t nb){
 */
 clientArray* createClientArray(size_t max_client){
   clientArray* ret = malloc(sizeof(clientArray));
-  if(ret==NULL){
-    fprintf(stderr,"%s\n", strerror(errno));
-    exit(errno);
-  }
+  if(ret==NULL)FATAL();
   ret->lst = malloc(sizeof(client)*max_client);
-  if(ret->lst == NULL){
-    fprintf(stderr,"%s\n", strerror(errno));
-    exit(errno);
-  }
+  if(ret->lst == NULL)FATAL();
   for(size_t i=0; i < max_client; i++){
     ret->lst[i].file_ptr=NULL;
     ret->lst[i].cartes = NULL;
@@ -149,17 +125,11 @@ void freeClientArray(clientArray *in){
 bool checkNewGame(clientArray *in){
     pthread_t *lst = malloc(sizeof(pthread_t)*in->size);
     int check;
-    if(lst==NULL){
-      fprintf(stderr, "%s\n", strerror(errno));
-      exit(errno);
-    }
+    if(lst==NULL)FATAL();
     for(size_t i=0;i<in->size;i++){
       check=pthread_create(lst+i,NULL, pthreadAskClient, (void *)(in->lst+i));
 
-      if(check!=0){
-        fprintf(stderr,"%s\n", strerror(errno));
-        exit(errno);
-      }
+      if(check!=0)FATAL();
     }
     char *ret;
     char bool_ret='y';
