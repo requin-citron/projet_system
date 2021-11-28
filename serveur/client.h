@@ -7,6 +7,9 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <libgen.h>
 
 #define FATAL(){fprintf(stderr,"%s\n",strerror(errno));exit(errno);}
 
@@ -20,6 +23,10 @@ typedef struct{
   char *cartes;
   FILE *file_ptr;
   size_t size;
+  size_t temp;
+  size_t prevTime;
+  size_t nbFails;
+  size_t nbCoupJoue;
 } client;
 
 typedef struct{
@@ -38,5 +45,6 @@ bool checkAllClientEmpty(clientArray *);
 void clientDelCard(client *, size_t);
 void changeAllClientIONonBlock(clientArray *);
 void changeAllClientIOBlock(clientArray *);
+int createPdf(char *,char *, clientArray *);
 
 #endif

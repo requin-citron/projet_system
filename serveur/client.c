@@ -167,3 +167,57 @@ void changeAllClientIONonBlock(clientArray *in){
     if(status==-1) FATAL();
   }
 }
+
+//! génére un pdf de la partie
+/*!
+  \param templatePath path de la template latex
+  \param outPath path de la sauvegarde du fichier latex
+  \param in pointeur sur le clientArray
+*/
+int createPdf(char *templatePath, char *outPath, clientArray *in){
+  FILE *file = fopen(templatePath,"r");
+  FILE *file_out = fopen(outPath,"w");
+  char *mem = NULL;
+  char *magie = NULL;
+  char *tmp=NULL;
+  char *cmd = NULL;
+  char *basePath = strdup(outPath);
+  dirname(basePath);
+  struct stat buff;
+  size_t size = 87+1+strlen(templatePath)*2;
+  size_t size1 = ( in->size*(30+SIZE_NAME+30) +1);;
+  int aze=0;
+  if(file==NULL || file_out == NULL){
+    fprintf(stderr,"%s\n",strerror(errno));
+    return -1;
+  }
+  fstat(fileno(file), &buff);
+  mem = malloc(sizeof(char)*(buff.st_size+1));
+  magie = malloc(sizeof(char) * size1);
+  cmd = malloc(sizeof(char)*(size));
+  memset(magie, 0x0, size1);
+  if(mem==NULL || magie == NULL || cmd == NULL){
+    fprintf(stderr,"%s\n",strerror(errno));
+    exit(errno);
+  }
+  tmp = magie;
+  //la taille est deja calculé pas besoin de la recheck
+  for (size_t i = 0; i < in->size; i++) {
+    aze=sprintf(tmp,"\\hline %s & %lu s & %lu & %lu \\\\\n", in->lst[i].name, in->lst[i].temp/in->lst[i].nbCoupJoue, in->lst[i].nbFails, in->lst[i].nbCoupJoue);
+    tmp += aze;
+  }
+  memset(mem, 0x0, buff.st_size+1);
+  fread(mem, 1, buff.st_size+1, file);
+  fprintf(file_out, mem, magie);
+  fflush(file_out);
+  //shetan
+  snprintf(cmd,size,"pdflatex  --disable-write18 -no-shell-escape -output-format=pdf  -output-directory %s  %s", basePath, outPath);
+  system(cmd);
+  fclose(file);
+  fclose(file_out);
+  free(mem);
+  free(magie);
+  free(cmd);
+  free(basePath);
+  return 0;
+}

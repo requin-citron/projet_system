@@ -1,149 +1,115 @@
-//http://sdz.tdct.org/sdz/les-sockets.html
-//https://www.tutorialspoint.com/unix_sockets/socket_server_example.htm
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include "serveur.h"
-#define SIZE_IN 50
+#include "client.h"
 
-#define NB_CARDS 10
+#define ITERATION_RANDOM 100
+#define SIZE_INPUT_USER 5
 
-int part_askNbPlayers();
-int part_acceptUsers(int,char[NB_SUPPORT_USERS][SIZE_IN], clientArray*);
-void part_distribCards(int,int*);
-void part_game(int,char[NB_SUPPORT_USERS][SIZE_IN],int*);
-char* ask(const char*,char[SIZE_IN]);
-int* pickCards(int[100],int[NB_CARDS]);
-int* sort(int[NB_CARDS]);
-void printCards(int*,int);
-int cardsNotEmpty(int*,int);
+int main(int argc, char const *argv[]) {
+  if(argc != 3){
+    printf("Usage: %s nb_joeur nb_manche\n", argv[0]);
+    return 1;
+  }
+  srand(time(NULL));
 
-int main(int argc, char** argv) {
-    while(ser_open() == EXIT_FAILURE) {
-      printf("Retry... ");
-      getchar();
+  size_t nb_client;
+  size_t nb_manche;
+  int sock = createSock();
+  clientArray *lstClient = NULL;
+  char *packet = createPacket(SIZE_PACKET,1000);
+  size_t curr_manche=1;
+  char prev_card = 0;
+  bool manche_state = true;
+  size_t currTime;
+  //client input
+  char client_input[SIZE_INPUT_USER];
+  char *ret_fgets = NULL;
+  size_t index_card;
+
+  nb_client = atol(argv[1]);
+  nb_manche = atol(argv[2]);
+  if(nb_client*nb_manche > SIZE_PACKET){
+    puts("le packet n'est pas assez grand pour la configuration de la partie");
+    return 1;
+  }
+  printf("Vous avez choisie %lu clients\n", nb_client);
+  lstClient =createClientArray(nb_client);
+  acceptClient(sock, lstClient, nb_client);
+  for (size_t i = 0; i < lstClient->size; i++) {
+    printf("Client N %lu %s\n",i,lstClient->lst[i].name);
+  }
+  //game loop
+  do {
+    changeAllClientIONonBlock(lstClient);
+    if(nb_manche < curr_manche) curr_manche=1;
+    packetFlush(packet, SIZE_PACKET, 1000);
+
+    for (size_t i = 0; i < lstClient->size; i++) {
+      fprintf(lstClient->lst[i].file_ptr, "\e[1;1H\e[2JVous etes manche %lu\n",curr_manche);
     }
 
-    fflush(stdin);
-    srand(time(NULL));
-    int nbPlayers = part_askNbPlayers();
-    clientArray *clients = createClientArray((size_t)nbPlayers);
-    char namePlayers[nbPlayers][SIZE_IN];
-    part_acceptUsers(nbPlayers,namePlayers, clients);
+    sendCards(lstClient,curr_manche, packet);
 
-    int minCardsByPlayers[nbPlayers];
-    part_distribCards(nbPlayers,minCardsByPlayers);
+    while(checkAllClientEmpty(lstClient) && manche_state){
+      //for each clients
+      for (size_t i = 0; i < lstClient->size && ret_fgets==NULL; i++) {
+        ret_fgets= fgets(client_input, SIZE_INPUT_USER,lstClient->lst[i].file_ptr);
+        if(ret_fgets!=NULL){
+          index_card=strtoul(client_input, NULL, 10);
+          //entré invalide
+          if(errno == EINVAL){
+            fprintf(lstClient->lst[i].file_ptr, "Entrée invalide\n");
+          }else{
 
-    part_game(nbPlayers,namePlayers,minCardsByPlayers);
-
-    ser_close();
-    printf("\n");
-    //free
-    freeClientArray(clients);
-    return EXIT_SUCCESS;
-}
-int part_askNbPlayers() {
-    int nbPlayers = -1;
-    do {
-        if (nbPlayers==0)
-            printf(" Incorrect input error\n");
-        printf(" How many players are we expecting ? (<%d)\n",NB_SUPPORT_USERS);
-        char buff[SIZE_IN];
-        nbPlayers=atoi(ask("",buff));
-    } while (nbPlayers==0||nbPlayers>NB_SUPPORT_USERS);
-    return nbPlayers;
-}
-int part_acceptUsers(int nbPlayers, char namePlayers[NB_SUPPORT_USERS][SIZE_IN], clientArray *clients) {
-    FILE *currentClient=NULL;
-    for (int t=0; t<nbPlayers; t++) {
-        ser_accept(clients);
-        currentClient = clients->lst[clients->end-1];
-        //ser_send(t," Hello, what's your name ?\n");
-        fprintf(currentClient, "Hello, what's your name ?\n");
-        char buff[SIZE_COM];
-        //ser_recv(t,buff);
-        fgets(buff,SIZE_COM, currentClient);
-        printf("Resp: %s magie\n", buff);
-        //snprintf(namePlayers[t],SIZE_IN,buff);
-        strncpy(namePlayers[t],buff,SIZE_IN);
-        namePlayers[t][strlen(namePlayers[t])-1] = '\0';
-        //snprintf(buff,SIZE_COM," Player %s (%d/%d) has just entered the room.\n",namePlayers[t],t+1,nbPlayers);
-        fprintf(currentClient, "Player %s (%d/%d) has just entered the room.\n", namePlayers[t],t+1,nbPlayers);
-        ser_sendAll(buff);
-        printf(buff);
-    }
-    return nbPlayers;
-}
-void part_distribCards(int nbPlayers, int* minCardsByPlayers) {
-    ser_sendAll("NEXT");
-    ser_sendAll(" Welcome in the mind game !\n Your cards are : ");
-    int allCards[100];
-    for (int t=0; t<100; t++)
-        allCards[t] = t+1;
-    for (int t=0; t<nbPlayers; t++) {
-        int cards[NB_CARDS];
-        pickCards(allCards,cards);
-        minCardsByPlayers[t] = cards[0];
-        ser_send(t,cards);
-        printf(" ");
-        printCards(cards,NB_CARDS);
-        printf("\n");
-    }
-}
-void part_game(int nbP, char nameP[NB_SUPPORT_USERS][SIZE_IN], int* minCars) {
-    /*int cardTmp;
-    int idTurnP = rand()%nbP;
-    do {
-        ser_send(idTurnP,"PLAY");
-        char buff[SIZE_COM];
-        ser_recv(idTurnP,buff);
-        if(!strcmp(buff,"P")) {
-
-            cli_recv(buff);
-        }
-    } while();*/
-}
-char* ask(const char *intro, char str[SIZE_IN]) {
-    printf("%s&> ",intro);
-    fgets(str,SIZE_IN,stdin);
-    fflush(stdin);
-    return str;
-}
-int* pickCards(int allCards[100], int cards[NB_CARDS]) {
-    int nb=0;
-    while (nb<NB_CARDS) {
-        int pick = rand()%100;
-        if (allCards[pick]==-1)
-            continue;
-        cards[nb++] = allCards[pick];
-        allCards[pick] = -1;
-    }
-    return sort(cards);
-}
-int* sort(int cards[NB_CARDS]) {
-    for (int t=0; t<NB_CARDS-1; t++)
-        for (int h=t+1; h<NB_CARDS; h++)
-            if (cards[t]>cards[h]) {
-                int tmp = cards[t];
-                cards[t] = cards[h];
-                cards[h] = tmp;
+            if(index_card < lstClient->lst[i].size){ // nombre valide
+              //envois de l'info a tout le monde
+              for(size_t d=0;d<lstClient->size;d++){
+                fprintf(lstClient->lst[d].file_ptr, "Joueur [%s] a jouer la carte %d\n", lstClient->lst[i].name, lstClient->lst[i].cartes[index_card]);
+              }
+              if((prev_card != 0) && (prev_card > lstClient->lst[i].cartes[index_card])){
+                manche_state = false;
+                lstClient->lst[i].nbFails++;
+              }
+              prev_card = lstClient->lst[i].cartes[index_card];
+              clientDelCard(lstClient->lst + i, index_card);
+              clientPrint(lstClient->lst+i, lstClient->lst[i].file_ptr);
+              currTime = time(NULL);
+              lstClient->lst[i].temp += currTime - lstClient->lst[i].prevTime;
+              lstClient->lst[i].prevTime = currTime;
+              lstClient->lst[i].nbCoupJoue++;
             }
-    return cards;
-}
-void printCards(int* cards, int s) {
-    int pos = cardsNotEmpty(cards,s);
-    if (pos==-1) return;
-    printf("[%d",cards[pos]);
-    while (++pos<s)
-        if (cards[pos]!=-1)
-            printf(",%d",cards[pos]);
-    printf("]");
-}
-int cardsNotEmpty(int *cards, int s) {
-    for (int t=0; t<s; t++)
-        if (cards[t]!=-1)
-            return t;
-    return -1;
+          }
+        }
+      }
+      ret_fgets=NULL;
+      //anti saturation du cpu
+      usleep(5000);
+    }
+    if(manche_state){
+      for (size_t i = 0; i < lstClient->size; i++) {
+        fprintf(lstClient->lst[i].file_ptr, "Vous avez gagné la manche\n");
+      }
+      curr_manche++;
+    }else{
+      for (size_t i = 0; i < lstClient->size; i++) {
+        fprintf(lstClient->lst[i].file_ptr, "Vous avez perdu retour manche 1\n");
+      }
+      curr_manche=1;
+    }
+    manche_state = true;
+    prev_card = 0;
+    changeAllClientIOBlock(lstClient);
+    sleep(3);
+  } while((curr_manche <= nb_manche) || (checkNewGame(lstClient)==true)); //check for a new game
+  //end game loop
+  if(createPdf("./template/template.tex", "./template/out.tex", lstClient)!=0){
+
+  }
+  //clean
+  free(packet);
+  freeClientArray(lstClient);
+  close(sock);
+  return 0;
 }

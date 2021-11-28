@@ -1,5 +1,5 @@
-#ifndef SERVEUR_H
-#define SERVEUR_H
+#ifndef SERVER_H
+#define SERVER_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,25 +10,22 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#define PORT 8080
-#define SIZE_COM 500
-#define NB_SUPPORT_USERS 5
+#include <pthread.h>
+#include <stdbool.h>
+#include "client.h"
+
+#define FATAL(){fprintf(stderr,"%s\n",strerror(errno));exit(errno);}
+
+#define PORT 8081
 
 
-typedef struct{
-  FILE **lst;
-  size_t end;
-  size_t size;
-} clientArray;
 
 
+int createSock();
 clientArray* createClientArray(size_t);
 void freeClientArray(clientArray *);
-int ser_open();
-void ser_close();
-int ser_accept(clientArray *);
-char* ser_recv(int,char[SIZE_COM]);
-int ser_send(int, const void*);
-void ser_sendAll(const void*);
-
+void acceptClient(int,clientArray *, size_t);
+void *pthreadInitClient(void *);
+void *pthreadAskClient(void *);
+bool checkNewGame(clientArray *);
 #endif
