@@ -173,6 +173,7 @@ void changeAllClientIONonBlock(clientArray *in){
   \param templatePath path de la template latex
   \param outPath path de la sauvegarde du fichier latex
   \param in pointeur sur le clientArray
+  \warning jamais d'input user potentiel injection de commande
 */
 int createPdf(char *templatePath, char *outPath, clientArray *in){
   FILE *file = fopen(templatePath,"r");
@@ -184,7 +185,7 @@ int createPdf(char *templatePath, char *outPath, clientArray *in){
   char *basePath = strdup(outPath);
   dirname(basePath);
   struct stat buff;
-  size_t size = 87+1+strlen(templatePath)*2;
+  size_t size = 87+1+strlen(templatePath)*2 +25;
   size_t size1 = ( in->size*(30+SIZE_NAME+30) +1);;
   int aze=0;
   if(file==NULL || file_out == NULL){

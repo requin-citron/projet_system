@@ -1,6 +1,6 @@
 CC=gcc
 CFLAG=-g3 -ggdb -Wall -Wextra
-LIBS=-lpthread
+LIBS=-lpthread -lcurl
 RM=rm
 SERVER_DIRECTORY=./serveur
 
