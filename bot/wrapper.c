@@ -9,7 +9,7 @@
 #include <errno.h>
 
 #define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 8081
+#define SERVER_PORT 8080
 #define BASH_SCRIPT "./bot1.sh"
 
 int main(int argc, char const *argv[]) {
