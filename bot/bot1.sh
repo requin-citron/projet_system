@@ -1,21 +1,28 @@
 #!/bin/bash
-echo "CHEVALO_BOT"
+NAME="CHEVALOBOT";
+echo "$NAME"
 
 line="";
 CURR=0;
 
+
 while true;do
-  while [[ $line != "Joueur CHEVALO_BOT :"*"," ]]; do
-    read -r line;
+  while [[ $line != "Joueur $NAME :"*"," ]]; do
+    read -t 0.2 -r line;
+    echo  -e "$line" >&2;
     if [[ $line == *"manche"* ]];then
       CURR=0;
-      echo "reset" >&2;
+    elif [[ $line == *"Voulez vous rejouer une partie ?(y/n):"* ]];then
+      echo "n";
+      read -t 5 -r line;
+      clear;
+      echo "$line" >&2;
+      exit 0;
     fi;
   done;
   # echo $(echo -n "${line}" | cut -d ':' -f2 | tr  ',' ' ') >&2;
   ARRAY="";
   for el in $(echo -n $(echo -n "${line}" | cut -d ':' -f2 | tr  ',' ' '));do
-    echo "el:$el" >&2;
     ARRAY="$ARRAY $el";
   done;
   #sort array
