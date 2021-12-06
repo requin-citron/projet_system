@@ -9,7 +9,6 @@ CURR=0;
 while true;do
   while [[ $line != "Joueur $NAME :"*"," ]]; do
     read -t 0.2 -r line;
-    echo  -e "$line" >&2;
     if [[ $line == *"manche"* ]];then
       CURR=0;
     elif [[ $line == *"Voulez vous rejouer une partie ?(y/n):"* ]];then
@@ -18,7 +17,9 @@ while true;do
       clear;
       echo "$line" >&2;
       exit 0;
-    fi;
+    elif [[ ! -z "$line" ]];then
+      echo  -e "$line" >&2;
+    fi
   done;
   # echo $(echo -n "${line}" | cut -d ':' -f2 | tr  ',' ' ') >&2;
   ARRAY="";
