@@ -73,7 +73,7 @@ int main(int argc, char const *argv[]) {
         if(ret_fgets!=NULL){
           index_card=strtoul(client_input, NULL, 10);
           //entré invalide
-          if(errno == EINVAL){
+          if(client_input[0]<0x30 || client_input[0]>0x39){
             fprintf(lstClient->lst[i].file_ptr, "Entrée invalide\n");
           }else{
 
