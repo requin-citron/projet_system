@@ -20,6 +20,7 @@
       <li><a href="#serveur_des">Serveur</a></li>
       <li><a href="#pdfimp">PDF</a></li>
       <li><a href="#client">Client</a></li>
+      <li><a href="#bot">Bot</a></li>
   </ul>
   <li><a href="#setup">Configuration du serveur</a></li>
     <ul>
@@ -51,7 +52,7 @@ Nous n'avons pas développé de client car nous préférons utiliser un client n
 Le programme serveur permet d'écouter sur toutes les interfaces
 sur un port hardcodé dans un fichier header.<br/>
 Il faut spécifier deux paramétres aux binaire le nombre de joueurs ainsi que le nombre de manche pour gagner.
-Toute la gestions ce fait coté serveur le client ne sert qu'a afficher les information envoyés par le serveur ainsi qu'a envoyer les entrées utilisateur.
+Toute la gestions ce fait coté serveur le client ne sert qu'a afficher les information envoyés par le serveur ainsi qu'a envoyer les entrées utilisateur.Le code du serveur ce décompose en trois fichiers, le fichier client.c qui gère tout ce qui concerne les clients la gestion de leurs input output ainsi que la gestion des cartes.Le fichier serveur.c possède tout les primitives pour le serveur création du socket gestion des threads.Quand a luis le fichier main.c possède tout le code propre aux jeux.
 
 #### Génération du PDF {#pdfgen}
 
@@ -79,16 +80,24 @@ Nous voulions crée un bot en bash pour cela nous avons utiliser une autre parti
 #### Serveur {#serveur_des}
 
 Nous utilisons des thread pour accepté tout les client pour cela nous utilisons pthread.Une fois tout les clients accepté le programme rentre dans une grande boucle qui permet de faire le jeu l'astuce utilisé est de passer tout les files descriptors des clients en mode non bloquant(CF [man fcntl](http://manpagesfr.free.fr/man/man2/fcntl.2.html)).<br/>
-Cette astuce permet  aux client de jouer quand ils veulent.
+Cette astuce permet  aux client de jouer quand ils veulent.Nous avons fais une fonction permettant de faire l'inverse pour la proposition de refaire une partie en mode bloquant.
+Nous utilisons curl pour envoyer le fichier sur le serveur.L'astuce est d'utiliser la commande curl qui posséde un argument pour crée un fichier C qui fais la même chose que la commande.
+
 
 #### PDF {#pdfimp}
 
-Nous avons fais une template en latex avec un \%s dedans ce qui permet d'injecter du latex dans le fichier. Nous utilisons ensuite la fonction system pour appeller pdflatex nous avons désactiver les write8 pour éviter toute injection de commande dans le latex, par contre notre solution de gére pas les pseudos avec des caractére non suporté par latex.De plus la fonction system n'est pas appellé avec des inputs user nous n'avons donc pas d'injection de commande.
+Nous avons fais une template en latex avec un \%s dedans ce qui permet d'injecter du latex dans le fichier. Nous utilisons ensuite la fonction system pour appeller pdflatex nous avons désactiver les write8 pour éviter toute injection de commande dans le latex, par contre notre solution de gére pas les pseudos avec des caractére non suporté par latex.
+De plus la fonction system n'est pas appellé avec des inputs user nous n'avons donc pas d'injection de commande.
 
 #### Client {#client}
 
 Nous avons crée un client dans le cas ou vous ne vouliez pas utiliser de client normalisé (cf [netcat](https://fr.wikipedia.org/wiki/Netcat)).
 Le client possède une ip hardcodé dans dans le fichier ainsi qu'un port hardcodé.Nous utilisons un thread de réception qui affiche en continue ce que le serveur envois.Dans la fonction principale nous avons envoyé tout ce que l'utilisateur tape au serveur.Ce qui permet d'avoir un comportement similaire a [netcat](https://fr.wikipedia.org/wiki/Netcat).
+
+#### Bot {#bot}
+
+Nous avons crée un bot en bash.Il ce décompose en deux partie une partie qui gère le réseaux en c ainsi qu'une partie qui gère le la partie en bash.Nous utilisons donc un wrapper qui permet d'ouvrir un socket puis qui remplace le filedescriptor de stdin et stdout par celui du socket.Maintenant tout ce qui est printé va dans le socket et tout ce qui est lue viens du socket.Le wrapper fais ensuite un execvp sur un script en bash pour conserver l'environnement.
+Par default les exec conservent les filedescriptor ce qui permet de pouvoir dans le script en bash intéragire avec le socket vie les echo et les read.Pour réaliser cela nous avons utiliser la fonction [dup2](http://manpagesfr.free.fr/man/man2/dup.2.html).Le code du bot est simple il récupére la list des cartes la trie dans l'ordre croissant puis les joues une par une en attendant un petit peu a chaque carte.Le bot va dormir 0.1 seconde fois la valeur de la carte puis en faisant de même avec la carte d'après en soustrayant la valeur déjà attendu.
 
 ### Configuration du serveur {#setup}
 
