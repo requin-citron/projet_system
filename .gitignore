@@ -9,6 +9,6 @@ a.out
 /serveur_kleman/*.o
 /serveur_kleman/serveur_kleman
 /vgcore*
-/tempate/out.*
+/tempate/out*
 /bot/wrapper
 /serveur/serveur_kleman

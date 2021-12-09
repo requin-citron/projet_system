@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,11 +13,23 @@
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 8080
 
+void *afficheAll(void *sock){
+  int s=*(int *)sock;
+  char buff[256] = {0};
+  while (true){
+    memset(buff, 0x0, 256);
+    recv(s,buff, 256, 0);
+    printf("%s",buff);
+  }
+}
+
 
 int main(int argc, char const *argv[]) {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   char buffer[1024];
+  pthread_t thread_id;
   struct sockaddr_in servaddr;
+  setvbuf(stdout, NULL, _IONBF, 0);
   if(sock == -1){
     fprintf(stderr, "%s\n", strerror(errno));
     return errno;
@@ -28,9 +41,11 @@ int main(int argc, char const *argv[]) {
     fprintf(stderr, "%s\n",strerror(errno));
     return errno;
   }
+  pthread_create(&thread_id, NULL, afficheAll, &sock);
   while (true) {
+    memset(buffer, 0x0 , 1024);
     fgets(buffer, 1024, stdin);
-    send(sock, buffer, 1024);
+    send(sock, buffer, strlen(buffer),0);
   }
   return 0;
 }
