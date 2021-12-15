@@ -36,7 +36,8 @@ L'objectif est de créer le jeu the mid avec les outils vus en cours de système
 Le jeux consiste a distribuer des cartes de 1 a 100 aux joueurs.
 A la manche 1, les joueurs ont 1 carte, à la manche 2 deux cartes et ainsi de suite.</br>
 En cas d'échec, les joueurs recommencent à la manche 1. Le but est que tous les joueurs posent leurs cartes dans l'odre croissant sans ordre de passage ni communication.
-Toute la subtilité du projet tourne autour de la mécanique qui permet aux joueurs de jouer quand ils veulent.
+Toute la subtilité du projet tourne autour de la mécanique qui permet aux joueurs de jouer quand ils veulent.<br/>
+Toutes les sources de ce projet sont disponible sur https://github.com/requin-citron/projet_system
 
 
 
