@@ -35,6 +35,7 @@ $(SERVER_DIRECTORY)/client.o: $(SERVER_DIRECTORY)/client.c $(SERVER_DIRECTORY)/c
 
 clean:
 		$(RM) ./serveur/*.o
+		$(RM) ./client/*.o
 doc:
 		doxygen
 doc_clean:
